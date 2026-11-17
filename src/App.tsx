@@ -58,12 +58,22 @@ export default function App() {
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(""), 2600); };
   const collectionStats = useMemo(() => rarities.map(r => ({ rarity: r, count: inventory.filter(c => c.rarity === r).length })), [inventory]);
   const currentCase = cases.find(c => c.id === chosen) ?? cases[0];
-  function openCase() {
+  function openCaseById(caseId: string) {
     if (opening) return;
-    if (balance < currentCase.price) { notify("Недостаточно ANICOINS"); return; }
-    setBalance(v => v - currentCase.price); setOpening(true); setResult(null);
-    window.setTimeout(() => { const card = rollCase(chosen); setInventory(v => [card, ...v]); setResult(card); setOpening(false); }, 1500);
+    const selectedCase = cases.find(c => c.id === caseId) ?? cases[0];
+    if (balance < selectedCase.price) { notify("Недостаточно ANICOINS"); return; }
+    setChosen(caseId);
+    setBalance(v => v - selectedCase.price);
+    setOpening(true);
+    setResult(null);
+    window.setTimeout(() => {
+      const card = rollCase(caseId);
+      setInventory(v => [card, ...v]);
+      setResult(card);
+      setOpening(false);
+    }, 1500);
   }
+  function openCase() { openCaseById(chosen); }
   function sell(card: Card) { setInventory(v => v.filter(c => c.id !== card.id)); setSelected(v => v.filter(id => id !== card.id)); setBalance(v => v + card.value); notify(`Продано за ${money(card.value)} AC`); }
   function upgrade() {
     const card = inventory.find(c => c.id === selected[0]);
@@ -104,7 +114,7 @@ export default function App() {
         <div className="hero-art"><div className="orb orb1" /><div className="orb orb2" /><div className="hero-card back"><img src={people[3].art} /><span>LEGENDARY</span></div><div className="hero-card front"><img src={people[0].art} /><span>MYTHIC DROP</span></div><div className="float-tag">✦ RARE COLLECTION</div></div></section>
         <div className="section-head"><div><div className="eyebrow">CHOOSE YOUR DESTINY</div><h2>Популярные кейсы</h2></div><button className="text-btn" onClick={() => setPage("cases")}>Все кейсы <ChevronRight size={16} /></button></div><div className="case-grid">{cases.map(c => <CaseTile key={c.id} c={c} onClick={() => { setChosen(c.id); setPage("cases"); }} />)}</div>
         <div className="section-head"><div><div className="eyebrow">FRESH FROM THE UNIVERSE</div><h2>Последние открытия</h2></div></div>{inventory[0] ? <div className="recent-card"><CardTile card={inventory[0]} /><span>Твоя последняя карточка</span></div> : <div className="activity"><Activity size={18} /><span>Твоя коллекция ждёт первого легендарного дропа.</span><button onClick={() => setPage("cases")}>Попробовать</button></div>}</>}
-      {page === "cases" && <><div className="page-title"><div className="eyebrow">CASE OPENING</div><h1>Выбери свой <em>кейс</em></h1><p>У каждого кейса свои шансы и собственная коллекция.</p></div><div className="case-grid big">{cases.map(c => <CaseTile key={c.id} c={c} active={chosen === c.id} onClick={() => { setChosen(c.id); setResult(null); }} />)}</div>
+      {page === "cases" && <><div className="page-title"><div className="eyebrow">CASE OPENING</div><h1>Выбери свой <em>кейс</em></h1><p>У каждого кейса свои шансы и собственная коллекция.</p></div><div className="case-grid big">{cases.map(c => <CaseTile key={c.id} c={c} active={chosen === c.id} onClick={() => openCaseById(c.id)} />)}</div>
         <div className="open-panel"><div className="open-info"><span className="eyebrow">SELECTED CASE</span><h2>{currentCase.name}</h2><p>{currentCase.sub}</p><div className="price"><Coins size={17} />{money(currentCase.price)} AC</div><button className="primary" disabled={opening} onClick={openCase}>{opening ? "Открываем..." : "Открыть кейс"} <ChevronRight size={17} /></button></div>
           <div className="roulette">{opening ? <div className="rolling"><RefreshCw className="spin" size={36} /><b>ПОИСК РЕДКОЙ КАРТОЧКИ...</b></div> : result ? <CardTile card={result} /> : <div className="roulette-empty"><Layers size={36} /><b>ТВОЙ СЛЕДУЮЩИЙ ДРОП</b><small>Нажми «Открыть кейс»</small></div>}</div></div>
         <div className="section-head"><div><div className="eyebrow">DROP RATES</div><h2>Шансы выпадения</h2></div></div><div className="rates">{rarities.map((r, i) => <div className="rate" key={r}><span className={`dot ${r.toLowerCase()}`} /><b>{r}</b><strong>{currentCase.drops[i]}%</strong></div>)}</div></>}
