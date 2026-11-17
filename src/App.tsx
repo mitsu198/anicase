@@ -5,12 +5,13 @@ type Rarity = "Common" | "Rare" | "Epic" | "Legendary" | "Mythic";
 type Card = { id: number; name: string; series: string; rarity: Rarity; value: number; art: string };
 const rarities: Rarity[] = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
 const people = [
-  { name: "Mika", series: "Moonlit Academy", art: "https://images.unsplash.com/photo-1578632767115-3515dad4c6f7?w=700" },
-  { name: "Ren", series: "Crimson Horizon", art: "https://images.unsplash.com/photo-1614583225154-5fccase8e1d1?w=700" },
-  { name: "Aiko", series: "Sakura Memories", art: "https://images.unsplash.com/photo-1578632767115-3515dad4c6f7?w=700" },
-  { name: "Kaito", series: "Eternal Night", art: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=700" },
-  { name: "Yuna", series: "Starfall", art: "https://images.unsplash.com/photo-1601850494422-3cf14624b0b3?w=700" },
-  { name: "Akira", series: "Neon Requiem", art: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=700" }
+  { name: "Хитори Гото", series: "Бocchi the Rock!", art: "https://livedoor.blogimg.jp/nijianime/imgs/6/a/6a4275b7.jpg" },
+  { name: "Юи Хирасава", series: "K-On!", art: "https://static.zerochan.net/K-ON%21.full.680112.jpg" },
+  { name: "Мио Акияма", series: "K-On!", art: "https://static.zerochan.net/K-ON%21.full.680112.jpg" },
+  { name: "Элейна", series: "Путешествие Элейны", art: "https://ogre.natalie.mu/media/news/comic/2026/0104/Elaina.jpg?imdensity=1&impolicy=hq&imwidth=1460" },
+  { name: "Кёко Хори", series: "Horimiya", art: "https://www.animenachrichten.de/wp-content/uploads/2020/11/EnCQugpUYAE76w7.jpeg" },
+  { name: "Идзуми Миямура", series: "Horimiya", art: "https://www.animenachrichten.de/wp-content/uploads/2020/11/EnCQugpUYAE76w7.jpeg" },
+  { name: "Уми Асанаги", series: "Я подружился со второй самой симпатичной девушкой в классе", art: "https://shikimori.io/uploads/poster/characters/218935/main_alt-2231f80b436463f09c38d24c270ccdd4.jpeg" }
 ];
 const cases = [
   { id: "starter", name: "First Spark", sub: "Первый шаг в коллекцию", price: 250, art: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900", drops: [65, 25, 8, 1.8, .2] },
