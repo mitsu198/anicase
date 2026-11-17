@@ -52,3 +52,15 @@
 @media(max-width:700px){.open-panel{grid-template-columns:1fr}.roulette{min-height:255px}.roulette-ring{width:190px;height:190px}.roulette-track{top:43%}.roulette-card{width:112px;flex-basis:112px;min-height:145px;padding:7px}.roulette-card img{height:90px}.roulette-result{gap:12px}.roulette-result .card-tile{width:125px}.roulette-result .card-art{height:110px}.roulette-result>b{font-size:15px}.upgrade-box{grid-template-columns:minmax(0,1fr) 105px minmax(0,1fr);gap:6px;padding:8px}.upgrade-slot{min-height:205px;padding:6px}.upgrade-slot>.card-tile{width:100%;margin-top:15px}.upgrade-slot .card-art{height:115px}.upgrade-slot .card-info{padding:7px}.upgrade-slot .card-info b{font-size:10px}.upgrade-slot .card-info small{font-size:7px}.upgrade-slot .card-info strong{font-size:9px}.upgrade-slot-label{font-size:6px;left:7px;top:8px}.chance-ring{width:84px;height:84px;padding:5px}.chance-ring-inner strong{font-size:15px}.chance-ring-inner small{font-size:5px}.upgrade-mid{gap:7px}.upgrade-mid select{width:98px;padding:5px;font-size:8px}.upgrade-start{font-size:8px;padding:9px 4px}.upgrade-cost{font-size:5px}.upgrade-arrows{font-size:13px}.upgrade-arrows span{font-size:18px}}
 
 @media(max-width:700px){@keyframes reelStop{0%{transform:translateX(0)}100%{transform:translateX(calc(-29 * 126px - 56px))}}}
+
+/* Upgrade odds dial: probability-sized success sector and a spinning pointer */
+.chance-ring{background:conic-gradient(from -90deg,#49d99a 0 var(--chance,0%),#34303a var(--chance,0%) 100%);overflow:visible;transition:filter .25s}
+.chance-ring-inner{position:relative;z-index:2}
+.upgrade-pointer{position:absolute;inset:0;z-index:4;border-radius:50%;pointer-events:none;transition:transform 3.8s cubic-bezier(.08,.72,.12,1);will-change:transform}
+.upgrade-pointer:before{content:"";position:absolute;left:calc(50% - 2px);top:5px;width:4px;height:calc(50% - 9px);border-radius:5px;background:linear-gradient(#fff5c8,#ff9d27);box-shadow:0 0 10px #ffad35}
+.upgrade-pointer i{position:absolute;left:50%;top:3px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #fff0bd;filter:drop-shadow(0 0 5px #ffb13c)}
+.chance-ring:after{content:"";position:absolute;z-index:3;left:50%;top:50%;width:13px;height:13px;transform:translate(-50%,-50%);border-radius:50%;background:#ffe0a0;border:3px solid #6e4b27;box-shadow:0 0 9px #ffb13c}
+.chance-ring.is-spinning{filter:brightness(1.25);box-shadow:0 0 35px #ff9b2066}
+.chance-ring.win{background:conic-gradient(#63f0a4 0 100%,#242d2b 100%)}
+.chance-ring.lose{background:conic-gradient(#ff596b 0 100%,#302127 100%)}
+@media(max-width:700px){.chance-ring:before{inset:-4px}.upgrade-pointer:before{top:4px;width:3px;height:calc(50% - 7px)}.upgrade-pointer i{top:2px;border-left-width:5px;border-right-width:5px;border-bottom-width:9px}}
