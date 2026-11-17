@@ -64,3 +64,42 @@
 .chance-ring.win{background:conic-gradient(#63f0a4 0 100%,#242d2b 100%)}
 .chance-ring.lose{background:conic-gradient(#ff596b 0 100%,#302127 100%)}
 @media(max-width:700px){.chance-ring:before{inset:-4px}.upgrade-pointer:before{top:4px;width:3px;height:calc(50% - 7px)}.upgrade-pointer i{top:2px;border-left-width:5px;border-right-width:5px;border-bottom-width:9px}}
+
+/* Mobile-first upgrader and target market */
+.target-price-label{display:flex;flex-direction:column;gap:7px;width:100%;max-width:170px;color:#c8b8d7;font-size:8px;font-weight:800;letter-spacing:1px}
+.target-price-input{display:flex;align-items:center;gap:6px;width:100%;padding:8px 10px;border:1px solid #76529a;border-radius:9px;background:#100e18}
+.target-price-input input{width:100%;min-width:0;background:transparent;color:#fff;font:700 16px 'Space Grotesk';outline:none}
+.target-price-input span{color:#c79bfa;font-size:10px}
+.upgrade-picker{margin-top:26px;padding:17px;border:1px solid #342644;border-radius:15px;background:#14101c}
+.upgrade-picker .section-head{margin:0 0 15px}
+.picker-count{font-size:10px;color:#a997b8;white-space:nowrap}
+.target-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:12px;max-height:520px;overflow:auto;padding:2px 4px 8px 2px}
+.target-card-grid .select-wrap{cursor:pointer}
+.target-card-grid .card-art{height:125px}
+.target-card-grid .card-info{padding:8px}
+.target-card-grid .card-info b{font-size:10px}
+.target-card-grid .card-info small{font-size:8px}
+.target-card-grid .card-info strong{font-size:10px;margin-top:7px}
+.target-empty{grid-column:1/-1}
+@media(max-width:700px){
+  .upgrade-box{display:flex;flex-direction:column;gap:10px;padding:12px}
+  .upgrade-slot{width:100%;min-height:0;padding:14px;display:flex;align-items:center;justify-content:center}
+  .upgrade-slot>.card-tile{width:min(100%,190px);margin-top:15px}
+  .upgrade-slot .card-art{height:175px}
+  .upgrade-mid{width:100%;display:grid;grid-template-columns:92px 1fr;grid-template-areas:"wheel chance" "wheel input" "wheel button" "wheel note" "outcome outcome";align-items:center;justify-items:center;gap:9px 12px;padding:8px 2px}
+  .chance-ring{grid-area:wheel;width:88px;height:88px}
+  .upgrade-arrows{display:none}
+  .target-price-label{grid-area:input;width:100%;max-width:none;align-self:end}
+  .upgrade-start{grid-area:button;max-width:240px}
+  .upgrade-cost{grid-area:note;font-size:8px}
+  .upgrade-outcome{grid-area:outcome}
+  .upgrade-picker{margin-top:18px;padding:12px}
+  .upgrade-picker .section-head{align-items:center;gap:8px}
+  .upgrade-picker .section-head h2{font-size:17px}
+  .target-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;max-height:620px}
+  .target-card-grid .card-art{height:155px}
+  .target-card-grid .card-info{padding:9px}
+  .target-card-grid .card-info b{font-size:11px}
+  .target-card-grid .card-info small{font-size:8px}
+  .target-card-grid .card-info strong{font-size:11px}
+}
