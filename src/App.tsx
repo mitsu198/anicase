@@ -15,7 +15,12 @@ const people = [
 const cases = [
   { id: "starter", name: "First Spark", sub: "Первый шаг в коллекцию", price: 250, art: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900", drops: [65, 25, 8, 1.8, .2] },
   { id: "neon", name: "Neon Nights", sub: "Город никогда не спит", price: 650, art: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=900", drops: [40, 35, 18, 6, 1] },
-  { id: "mythic", name: "Mythic Bloom", sub: "Охота за легендами", price: 1400, art: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900", drops: [20, 35, 27, 15, 3] }
+  { id: "mythic", name: "Mythic Bloom", sub: "Охота за легендами", price: 1400, art: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900", drops: [20, 35, 27, 15, 3] },
+  { id: "ronin", name: "Crimson Ronin", sub: "Самурайская коллекция", price: 450, art: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=900", drops: [55, 29, 12, 3.5, .5] },
+  { id: "academy", name: "Sakura Academy", sub: "Школьные истории и тайны", price: 800, art: "https://images.unsplash.com/photo-1578632767115-3515dad4c6f7?w=900", drops: [38, 36, 18, 7, 1] },
+  { id: "shadow", name: "Shadow Realm", sub: "Тёмные силы пробуждаются", price: 1100, art: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900", drops: [30, 35, 23, 10, 2] },
+  { id: "starlight", name: "Starlight Wish", sub: "Герои под звёздным небом", price: 1900, art: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900", drops: [18, 32, 30, 16, 4] },
+  { id: "dragon", name: "Dragon Core", sub: "Сила древних драконов", price: 2800, art: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=900", drops: [12, 25, 32, 23, 8] }
 ];
 const values: Record<Rarity, number> = { Common: 100, Rare: 260, Epic: 700, Legendary: 2200, Mythic: 9000 };
 const nav = [{ id: "home", label: "Главная", Icon: Home }, { id: "cases", label: "Кейсы", Icon: Package }, { id: "upgrader", label: "Апгрейдер", Icon: Zap }, { id: "contracts", label: "Контракты", Icon: ArrowDownUp }, { id: "battle", label: "Баттлы", Icon: Swords }, { id: "inventory", label: "Инвентарь", Icon: Layers }];
