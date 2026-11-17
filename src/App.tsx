@@ -42,21 +42,25 @@ const cases = [
   { id: "academy", name: "Sakura Academy", sub: "Школьные истории и тайны", price: 800, art: "https://images.unsplash.com/photo-1578632767115-3515dad4c6f7?w=900", drops: [38, 36, 18, 7, 1] },
   { id: "shadow", name: "Shadow Realm", sub: "Тёмные силы пробуждаются", price: 1100, art: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900", drops: [30, 35, 23, 10, 2] },
   { id: "starlight", name: "Starlight Wish", sub: "Герои под звёздным небом", price: 1900, art: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900", drops: [18, 32, 30, 16, 4] },
-  { id: "dragon", name: "Dragon Core", sub: "Сила древних драконов", price: 2800, art: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=900", drops: [12, 25, 32, 23, 8] }
+  { id: "dragon", name: "Dragon Core", sub: "Сила древних драконов", price: 2800, art: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=900", drops: [12, 25, 32, 23, 8] },
+  { id: "celestial", name: "Celestial Vault", sub: "Редчайшие герои вселенной", price: 12000, art: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1000", drops: [5, 12, 28, 35, 20] },
+  { id: "infinity", name: "Infinity Crown", sub: "Охота за абсолютной ценностью", price: 50000, art: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1000", drops: [2, 8, 20, 35, 35] },
+  { id: "eclipse", name: "Eclipse Emperor", sub: "Коллекция вне времени", price: 250000, art: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1000", drops: [1, 4, 15, 35, 45] },
+  { id: "apex", name: "ANICASE APEX", sub: "Максимальная ценность · 1 234 567 AC", price: 1234567, art: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1000", drops: [.2, 1.8, 8, 30, 60] },
 ];
 const values: Record<Rarity, number> = { Common: 100, Rare: 260, Epic: 700, Legendary: 2200, Mythic: 9000 };
-const priceRanges: Record<Rarity, [number, number]> = { Common: [70, 220], Rare: [220, 650], Epic: [650, 1800], Legendary: [1800, 5200], Mythic: [5200, 15000] };
+const priceRanges: Record<Rarity, [number, number]> = { Common: [70, 220], Rare: [220, 650], Epic: [650, 1800], Legendary: [1800, 5200], Mythic: [5200, 1234567] };
 const nav = [{ id: "home", label: "Главная", Icon: Home }, { id: "cases", label: "Кейсы", Icon: Package }, { id: "upgrader", label: "Апгрейдер", Icon: Zap }, { id: "contracts", label: "Контракты", Icon: ArrowDownUp }, { id: "battle", label: "Баттлы", Icon: Swords }, { id: "inventory", label: "Инвентарь", Icon: Layers }];
 const money = (n: number) => n.toLocaleString("ru-RU");
 function makeCard(rarity: Rarity): Card {
   const p = people[Math.floor(Math.random() * people.length)];
   return { id: Date.now() + Math.floor(Math.random() * 100000), name: p.name, series: p.series, rarity, value: Math.round(priceRanges[rarity][0] + Math.random() * (priceRanges[rarity][1] - priceRanges[rarity][0])), art: p.art };
 }
-const targetCatalog: Card[] = Array.from({ length: 140 }, (_, i) => {
-  const rarity = rarities[i % rarities.length];
-  const p = people[Math.floor(i / rarities.length) % people.length];
-  const range = priceRanges[rarity];
-  return { id: 900000 + i, name: p.name, series: p.series, rarity, value: Math.round(range[0] + ((i * 7919) % 1000) / 1000 * (range[1] - range[0])), art: p.art };
+const targetCatalog: Card[] = Array.from({ length: 300 }, (_, i) => {
+  const p = people[i % people.length];
+  const value = Math.round(70 * Math.pow(1234567 / 70, i / 299));
+  const rarity: Rarity = value < 220 ? "Common" : value < 650 ? "Rare" : value < 1800 ? "Epic" : value < 5200 ? "Legendary" : "Mythic";
+  return { id: 900000 + i, name: p.name, series: p.series, rarity, value, art: p.art };
 });
 function rollCase(id: string): Card {
   const c = cases.find(x => x.id === id) ?? cases[0];
@@ -65,8 +69,9 @@ function rollCase(id: string): Card {
   return makeCard(rarities[index]);
 }
 function CardTile({ card, action, selected, onSelect }: { card: Card; action?: { label: string; run: () => void }; selected?: boolean; onSelect?: () => void }) {
+  const [artFailed, setArtFailed] = useState(false);
   return <article className={`card-tile ${card.rarity.toLowerCase()} ${selected ? "selected" : ""}`} onClick={onSelect}>
-    <div className="card-art"><img src={card.art} alt={card.name} /><span className="rarity-label">{card.rarity}</span></div>
+    <div className={`card-art ${artFailed ? "art-fallback" : ""}`}>{artFailed ? <div className="art-placeholder"><span>✦</span><b>{card.name}</b><small>{card.series}</small></div> : <img src={card.art} alt={card.name} loading="lazy" referrerPolicy="no-referrer" onError={() => setArtFailed(true)} />}<span className="rarity-label">{card.rarity}</span></div>
     <div className="card-info"><b>{card.name}</b><small>{card.series}</small><strong>{money(card.value)} AC</strong></div>
     {action && <button className="sell" onClick={e => { e.stopPropagation(); action.run(); }}>{action.label}</button>}
   </article>;
@@ -86,6 +91,8 @@ export default function App() {
   const [spinCards, setSpinCards] = useState<Card[]>([]);
   const [upgrading, setUpgrading] = useState(false);
   const [result, setResult] = useState<Card | null>(null);
+  const [resultBatch, setResultBatch] = useState<Card[]>([]);
+  const [openCount, setOpenCount] = useState(1);
   const [selected, setSelected] = useState<number[]>([]);
   const [upgradeTarget, setUpgradeTarget] = useState<Rarity>("Epic");
   const [upgradeTargetCard, setUpgradeTargetCard] = useState<Card>(() => makeCard("Epic"));
@@ -101,49 +108,49 @@ export default function App() {
   const selectedUpgradeCard = inventory.find(c => c.id === selected[0]);
   const upgradeChance = selectedUpgradeCard ? Math.min(95, Math.max(1, (selectedUpgradeCard.value / upgradeTargetCard.value) * 100)) : 0;
   const targetCandidates = useMemo(() => targetCatalog.filter(card => card.value >= Math.max(0, Number(upgradeMinValue) || 0)).sort((x, y) => x.value - y.value), [upgradeMinValue]);
-  function openCaseById(caseId: string) {
+  function selectCase(caseId: string) { if (opening) return; setChosen(caseId); setResult(null); setResultBatch([]); }
+  function openCase() {
     if (opening) return;
-    const selectedCase = cases.find(c => c.id === caseId) ?? cases[0];
-    if (balance < selectedCase.price) { notify("Недостаточно ANICOINS"); return; }
-    setChosen(caseId);
-    setBalance(v => v - selectedCase.price);
-    setResult(null);
-    const winner = rollCase(caseId);
-    const strip = Array.from({ length: 34 }, (_, i) => i === 29 ? winner : rollCase(caseId));
+    const selectedCase = currentCase;
+    const count = Math.max(1, Math.min(10, openCount));
+    const total = selectedCase.price * count;
+    if (balance < total) { notify("Недостаточно ANICOINS для такого количества"); return; }
+    setBalance(v => v - total);
+    setResult(null); setResultBatch([]);
+    const winners = Array.from({ length: count }, () => rollCase(chosen));
+    const winner = winners[0];
+    const strip = Array.from({ length: 34 }, (_, i) => i === 29 ? winner : rollCase(chosen));
     setSpinCards(strip);
     setOpening(true);
     window.setTimeout(() => {
-      setInventory(v => [winner, ...v]);
+      setInventory(v => [...winners, ...v]);
       setResult(winner);
+      setResultBatch(winners);
       setOpening(false);
+      if (count > 1) notify(`Открыто ${count} кейсов · получено ${winners.length} карточек`);
     }, 7200);
   }
-  function openCase() { openCaseById(chosen); }
   function sell(card: Card) { setInventory(v => v.filter(c => c.id !== card.id)); setSelected(v => v.filter(id => id !== card.id)); setBalance(v => v + card.value); notify(`Продано за ${money(card.value)} AC`); }
   function upgrade() {
     if (upgrading) return;
     const card = selectedUpgradeCard;
     if (!card) return notify("Сначала выбери карточку в инвентаре");
     const chance = Math.min(95, Math.max(1, (card.value / upgradeTargetCard.value) * 100));
-    const success = Math.random() * 100 < chance;
-    const successArc = chance * 3.6;
-    const landing = success ? Math.random() * successArc : successArc + Math.random() * (360 - successArc);
+    const finalAngle = Math.random() * 360;
+    const success = finalAngle < chance * 3.6;
     setUpgradeOutcome(null);
-    setUpgradeSpinAngle(v => v + 1800 + landing);
+    setUpgradeSpinAngle(v => v + 1800 + finalAngle);
     setUpgrading(true);
     window.setTimeout(() => {
-      setInventory(v => v.filter(c => c.id !== card.id));
+      setInventory(v => {
+        const remaining = v.filter(c => c.id !== card.id);
+        return success ? [upgradeTargetCard, ...remaining] : remaining;
+      });
       setSelected([]);
-      if (success) {
-        setInventory(v => [upgradeTargetCard, ...v]);
-        setUpgradeOutcome("win");
-        notify(`Успех! Получена карточка ${upgradeTargetCard.name}`);
-      } else {
-        setUpgradeOutcome("lose");
-        notify("Неудача. Карточка потеряна в апгрейде");
-      }
+      setUpgradeOutcome(success ? "win" : "lose");
+      notify(success ? `Успех! Получена карточка ${upgradeTargetCard.name}` : "Неудача. Карточка потеряна в апгрейде");
       setUpgrading(false);
-    }, 3800);
+    }, 3900);
   }
   function contract() {
     const chosenCards = inventory.filter(c => selected.includes(c.id));
@@ -174,8 +181,8 @@ export default function App() {
         <div className="hero-art"><div className="orb orb1" /><div className="orb orb2" /><div className="hero-card back"><img src={people[3].art} /><span>LEGENDARY</span></div><div className="hero-card front"><img src={people[0].art} /><span>MYTHIC DROP</span></div><div className="float-tag">✦ RARE COLLECTION</div></div></section>
         <div className="section-head"><div><div className="eyebrow">CHOOSE YOUR DESTINY</div><h2>Популярные кейсы</h2></div><button className="text-btn" onClick={() => setPage("cases")}>Все кейсы <ChevronRight size={16} /></button></div><div className="case-grid">{cases.map(c => <CaseTile key={c.id} c={c} onClick={() => { setChosen(c.id); setPage("cases"); }} />)}</div>
         <div className="section-head"><div><div className="eyebrow">FRESH FROM THE UNIVERSE</div><h2>Последние открытия</h2></div></div>{inventory[0] ? <div className="recent-card"><CardTile card={inventory[0]} /><span>Твоя последняя карточка</span></div> : <div className="activity"><Activity size={18} /><span>Твоя коллекция ждёт первого легендарного дропа.</span><button onClick={() => setPage("cases")}>Попробовать</button></div>}</>}
-      {page === "cases" && <><div className="page-title"><div className="eyebrow">CASE OPENING</div><h1>Выбери свой <em>кейс</em></h1><p>У каждого кейса свои шансы и собственная коллекция.</p></div><div className="case-grid big">{cases.map(c => <CaseTile key={c.id} c={c} active={chosen === c.id} onClick={() => openCaseById(c.id)} />)}</div>
-        <div className="open-panel"><div className="open-info"><span className="eyebrow">SELECTED CASE</span><h2>{currentCase.name}</h2><p>{currentCase.sub}</p><div className="price"><Coins size={17} />{money(currentCase.price)} AC</div><button className="primary" disabled={opening} onClick={openCase}>{opening ? "Открываем..." : "Открыть кейс"} <ChevronRight size={17} /></button></div>
+      {page === "cases" && <><div className="page-title"><div className="eyebrow">CASE OPENING</div><h1>Выбери свой <em>кейс</em></h1><p>У каждого кейса свои шансы и собственная коллекция.</p></div><div className="case-grid big">{cases.map(c => <CaseTile key={c.id} c={c} active={chosen === c.id} onClick={() => selectCase(c.id)} />)}</div>
+        <div className="open-panel"><div className="open-info"><span className="eyebrow">SELECTED CASE</span><h2>{currentCase.name}</h2><p>{currentCase.sub}</p><div className="price"><Coins size={17} />{money(currentCase.price)} AC / шт.</div><label className="case-quantity">КОЛИЧЕСТВО КЕЙСОВ <select value={openCount} disabled={opening} onChange={e => setOpenCount(Math.max(1, Math.min(10, Number(e.target.value))))}>{Array.from({length:10},(_,i)=><option key={i+1} value={i+1}>{i+1} {i===0?"кейс":"кейса"}</option>)}</select></label><div className="case-total">Итого: <b>{money(currentCase.price * openCount)} AC</b></div><button className="primary" disabled={opening} onClick={openCase}>{opening ? "Открываем..." : `Открыть ${openCount} · ${money(currentCase.price * openCount)} AC`} <ChevronRight size={17} /></button></div>
           <div className={`roulette ${opening ? "roulette-active" : ""} ${result ? "roulette-won" : ""}`}>
             <div className="roulette-ring"><span /><span /><span /></div>
             {opening ? <><div className="roulette-track">{spinCards.map((card, i) => <div className={`roulette-card ${i === 29 ? "roulette-winner" : ""} ${card.rarity.toLowerCase()}`} key={card.id + "-" + i}><img src={card.art} alt="" /><b>{card.name}</b><small className={`rarity-${card.rarity.toLowerCase()}`}>{card.rarity}</small></div>)}</div><div className="rolling-caption"><span className="rolling-dot" /> РУЛЕТКА КРУТИТСЯ...</div></> : result ? <div className="roulette-result"><CardTile card={result} /><b>ВЫПАЛО!</b></div> : <div className="roulette-preview"><img src={currentCase.art} alt="" /><div><b>{currentCase.name}</b><small>Открой кейс и испытай удачу</small></div></div>}
