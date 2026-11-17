@@ -24,12 +24,19 @@ const cases = [
   { id: "dragon", name: "Dragon Core", sub: "Сила древних драконов", price: 2800, art: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=900", drops: [12, 25, 32, 23, 8] }
 ];
 const values: Record<Rarity, number> = { Common: 100, Rare: 260, Epic: 700, Legendary: 2200, Mythic: 9000 };
+const priceRanges: Record<Rarity, [number, number]> = { Common: [70, 220], Rare: [220, 650], Epic: [650, 1800], Legendary: [1800, 5200], Mythic: [5200, 15000] };
 const nav = [{ id: "home", label: "Главная", Icon: Home }, { id: "cases", label: "Кейсы", Icon: Package }, { id: "upgrader", label: "Апгрейдер", Icon: Zap }, { id: "contracts", label: "Контракты", Icon: ArrowDownUp }, { id: "battle", label: "Баттлы", Icon: Swords }, { id: "inventory", label: "Инвентарь", Icon: Layers }];
 const money = (n: number) => n.toLocaleString("ru-RU");
 function makeCard(rarity: Rarity): Card {
   const p = people[Math.floor(Math.random() * people.length)];
-  return { id: Date.now() + Math.floor(Math.random() * 100000), name: p.name, series: p.series, rarity, value: values[rarity], art: p.art };
+  return { id: Date.now() + Math.floor(Math.random() * 100000), name: p.name, series: p.series, rarity, value: Math.round(priceRanges[rarity][0] + Math.random() * (priceRanges[rarity][1] - priceRanges[rarity][0])), art: p.art };
 }
+const targetCatalog: Card[] = Array.from({ length: 140 }, (_, i) => {
+  const rarity = rarities[i % rarities.length];
+  const p = people[Math.floor(i / rarities.length) % people.length];
+  const range = priceRanges[rarity];
+  return { id: 900000 + i, name: p.name, series: p.series, rarity, value: Math.round(range[0] + ((i * 7919) % 1000) / 1000 * (range[1] - range[0])), art: p.art };
+});
 function rollCase(id: string): Card {
   const c = cases.find(x => x.id === id) ?? cases[0];
   let roll = Math.random() * 100, sum = 0, index = 0;
@@ -63,6 +70,7 @@ export default function App() {
   const [upgradeTargetCard, setUpgradeTargetCard] = useState<Card>(() => makeCard("Epic"));
   const [upgradeOutcome, setUpgradeOutcome] = useState<"win" | "lose" | null>(null);
   const [upgradeSpinAngle, setUpgradeSpinAngle] = useState(0);
+  const [upgradeMinValue, setUpgradeMinValue] = useState("500");
   const [toast, setToast] = useState("");
   const [battleResult, setBattleResult] = useState("");
   useEffect(() => { localStorage.setItem("ac_balance", String(balance)); localStorage.setItem("ac_inventory", JSON.stringify(inventory)); }, [balance, inventory]);
@@ -71,6 +79,7 @@ export default function App() {
   const currentCase = cases.find(c => c.id === chosen) ?? cases[0];
   const selectedUpgradeCard = inventory.find(c => c.id === selected[0]);
   const upgradeChance = selectedUpgradeCard ? Math.min(95, Math.max(1, (selectedUpgradeCard.value / upgradeTargetCard.value) * 100)) : 0;
+  const targetCandidates = useMemo(() => targetCatalog.filter(card => card.value >= Math.max(0, Number(upgradeMinValue) || 0)).sort((x, y) => x.value - y.value), [upgradeMinValue]);
   function openCaseById(caseId: string) {
     if (opening) return;
     const selectedCase = cases.find(c => c.id === caseId) ?? cases[0];
@@ -94,7 +103,6 @@ export default function App() {
     if (upgrading) return;
     const card = selectedUpgradeCard;
     if (!card) return notify("Сначала выбери карточку в инвентаре");
-    if (rarities.indexOf(upgradeTarget) <= rarities.indexOf(card.rarity)) return notify("Цель должна быть выше редкости карточки");
     const chance = Math.min(95, Math.max(1, (card.value / upgradeTargetCard.value) * 100));
     const success = Math.random() * 100 < chance;
     const successArc = chance * 3.6;
@@ -159,13 +167,21 @@ export default function App() {
           <div className="upgrade-mid">
             <div className={`chance-ring ${upgradeOutcome || ""} ${upgrading ? "is-spinning" : ""}`} style={{ background: `conic-gradient(from -90deg,#49d99a 0 ${upgradeChance}%,#34303a ${upgradeChance}% 100%)` }}><div className="chance-ring-inner"><strong>{upgradeChance.toFixed(2)}%</strong><small>ШАНС УСПЕХА</small></div><div className="upgrade-pointer" style={{ transform: `rotate(${upgradeSpinAngle}deg)` }}><i /></div></div>
             <div className="upgrade-arrows">‹ <span>➜</span> ›</div>
-            <label>Редкость цели<select value={upgradeTarget} disabled={upgrading} onChange={e => { const rarity=e.target.value as Rarity; setUpgradeTarget(rarity); setUpgradeTargetCard(makeCard(rarity)); setUpgradeOutcome(null); }}>{rarities.map(r => <option key={r}>{r}</option>)}</select></label>
+            <label className="target-price-label">МИНИМАЛЬНАЯ ЦЕНА ЦЕЛИ
+              <div className="target-price-input"><input type="number" min="0" step="50" value={upgradeMinValue} disabled={upgrading} onChange={e => setUpgradeMinValue(e.target.value)} /><span>AC</span></div>
+            </label>
             <button className="primary upgrade-start" disabled={upgrading} onClick={upgrade}>{upgrading ? "АПГРЕЙД..." : "УЛУЧШИТЬ"} <Zap size={15} /></button>
             <small className="upgrade-cost">БЕСПЛАТНО · ШАНС = СТОИМОСТЬ / ЦЕЛЬ</small>
             {upgradeOutcome && <b className="upgrade-outcome">{upgradeOutcome === "win" ? "✦ УСПЕШНО!" : "✕ НЕ ПОВЕЗЛО"}</b>}
           </div>
-          <div className="upgrade-slot target-slot"><span className="upgrade-slot-label">ЖЕЛАЕМАЯ КАРТОЧКА</span><CardTile card={upgradeTargetCard} /></div>
-        </div><div className="section-head"><h2>Выбери карточку</h2></div><div className="cards-grid">{inventory.map(c => <div key={c.id} className="select-wrap"><CardTile card={c} selected={selected[0] === c.id} onSelect={() => setSelected([c.id])} /></div>)}</div></>}
+          <div className="upgrade-slot target-slot"><span className="upgrade-slot-label">ВЫБРАННАЯ ЦЕЛЬ</span><CardTile card={upgradeTargetCard} /></div>
+        </div>
+        <div className="upgrade-picker">
+          <div className="section-head"><div><div className="eyebrow">TARGET MARKET</div><h2>Карточки от {money(Math.max(0, Number(upgradeMinValue) || 0))} AC</h2></div><span className="picker-count">{targetCandidates.length} вариантов</span></div>
+          <div className="target-card-grid">{targetCandidates.map(card => <div key={card.id} className="select-wrap" onClick={() => { if (!upgrading) { setUpgradeTargetCard(card); setUpgradeTarget(card.rarity); setUpgradeOutcome(null); } }}><CardTile card={card} selected={upgradeTargetCard.id === card.id} /></div>)}
+          {targetCandidates.length === 0 && <div className="empty target-empty">Нет карточек по такой цене. Уменьши сумму.</div>}</div>
+        </div>
+        <div className="section-head"><h2>Твоя карточка для апгрейда</h2></div><div className="cards-grid">{inventory.map(c => <div key={c.id} className="select-wrap"><CardTile card={c} selected={selected[0] === c.id} onSelect={() => setSelected([c.id])} /></div>)}</div></>}
       {page === "contracts" && <><div className="page-title"><div className="eyebrow">TRADE UP</div><h1>Контракты <em>обмена</em></h1><p>Обмени три или больше карточек на одну более высокой редкости.</p></div><div className="contract-banner"><div><span className="eyebrow">CONTRACT SYSTEM</span><h2>{selected.length} <small>/ минимум 3</small></h2><p>Выбери карточки в инвентаре ниже.</p></div><button className="primary" onClick={contract}>Собрать контракт <ArrowUpRight size={16} /></button></div><div className="section-head"><h2>Твои карточки</h2></div><div className="cards-grid">{inventory.map(c => <div key={c.id} className="select-wrap"><CardTile card={c} selected={selected.includes(c.id)} onSelect={() => setSelected(v => v.includes(c.id) ? v.filter(id => id !== c.id) : [...v, c.id])} /></div>)}</div></>}
       {page === "battle" && <><div className="page-title"><div className="eyebrow">CASE BATTLE · PRACTICE</div><h1>Битва <em>коллекций</em></h1><p>Тренировочный режим против бота. Это не онлайн-мультиплеер.</p></div><div className="battle-arena"><div className="fighter"><div className="bot-avatar">YOU</div><b>Ты</b><small>Твоя коллекция</small><strong>{inventory.length} карт.</strong></div><div className="versus">VS</div><div className="fighter"><div className="bot-avatar">BOT</div><b>ANICASE BOT</b><small>Соперник</small><strong>Случайная карта</strong></div></div><div className="battle-action"><div><b>Тренировочный раунд</b><small>Победа приносит 150 AC · без ставок</small></div><button className="primary" onClick={runBattle}>Начать битву <Swords size={16} /></button></div>{battleResult && <div className="notice">{battleResult}</div>}</>}
     </div></main>
