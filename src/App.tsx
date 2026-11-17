@@ -62,12 +62,15 @@ export default function App() {
   const [upgradeTarget, setUpgradeTarget] = useState<Rarity>("Epic");
   const [upgradeTargetCard, setUpgradeTargetCard] = useState<Card>(() => makeCard("Epic"));
   const [upgradeOutcome, setUpgradeOutcome] = useState<"win" | "lose" | null>(null);
+  const [upgradeSpinAngle, setUpgradeSpinAngle] = useState(0);
   const [toast, setToast] = useState("");
   const [battleResult, setBattleResult] = useState("");
   useEffect(() => { localStorage.setItem("ac_balance", String(balance)); localStorage.setItem("ac_inventory", JSON.stringify(inventory)); }, [balance, inventory]);
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(""), 2600); };
   const collectionStats = useMemo(() => rarities.map(r => ({ rarity: r, count: inventory.filter(c => c.rarity === r).length })), [inventory]);
   const currentCase = cases.find(c => c.id === chosen) ?? cases[0];
+  const selectedUpgradeCard = inventory.find(c => c.id === selected[0]);
+  const upgradeChance = selectedUpgradeCard ? Math.min(95, Math.max(1, (selectedUpgradeCard.value / upgradeTargetCard.value) * 100)) : 0;
   function openCaseById(caseId: string) {
     if (opening) return;
     const selectedCase = cases.find(c => c.id === caseId) ?? cases[0];
@@ -89,12 +92,16 @@ export default function App() {
   function sell(card: Card) { setInventory(v => v.filter(c => c.id !== card.id)); setSelected(v => v.filter(id => id !== card.id)); setBalance(v => v + card.value); notify(`Продано за ${money(card.value)} AC`); }
   function upgrade() {
     if (upgrading) return;
-    const card = inventory.find(c => c.id === selected[0]);
+    const card = selectedUpgradeCard;
     if (!card) return notify("Сначала выбери карточку в инвентаре");
     if (rarities.indexOf(upgradeTarget) <= rarities.indexOf(card.rarity)) return notify("Цель должна быть выше редкости карточки");
+    const chance = Math.min(95, Math.max(1, (card.value / upgradeTargetCard.value) * 100));
+    const success = Math.random() * 100 < chance;
+    const successArc = chance * 3.6;
+    const landing = success ? Math.random() * successArc : successArc + Math.random() * (360 - successArc);
     setUpgradeOutcome(null);
+    setUpgradeSpinAngle(v => v + 1800 + landing);
     setUpgrading(true);
-    const success = Math.random() < .38;
     window.setTimeout(() => {
       setInventory(v => v.filter(c => c.id !== card.id));
       setSelected([]);
@@ -107,7 +114,7 @@ export default function App() {
         notify("Неудача. Карточка потеряна в апгрейде");
       }
       setUpgrading(false);
-    }, 3600);
+    }, 3800);
   }
   function contract() {
     const chosenCards = inventory.filter(c => selected.includes(c.id));
@@ -150,11 +157,11 @@ export default function App() {
       {page === "upgrader" && <><div className="page-title"><div className="eyebrow">RISK IT FOR THE RARE</div><h1>Карточный <em>апгрейд</em></h1><p>Поставь карточку на кон и попробуй получить редкость выше.</p></div><div className={`upgrade-box ${upgrading ? "upgrade-running" : ""} ${upgradeOutcome === "win" ? "upgrade-success" : upgradeOutcome === "lose" ? "upgrade-fail" : ""}`}>
           <div className="upgrade-slot source-slot"><span className="upgrade-slot-label">ТВОЯ КАРТОЧКА</span>{inventory.find(c => c.id === selected[0]) ? <CardTile card={inventory.find(c => c.id === selected[0])!} /> : <div className="slot-empty"><Layers size={30} /><b>Выбери карточку</b><small>В инвентаре ниже</small></div>}</div>
           <div className="upgrade-mid">
-            <div className={`chance-ring ${upgrading ? "chance-spinning" : ""} ${upgradeOutcome || ""}`}><div className="chance-ring-inner"><strong>38.00%</strong><small>ШАНС УСПЕХА</small></div></div>
+            <div className={`chance-ring ${upgradeOutcome || ""} ${upgrading ? "is-spinning" : ""}`}><div className="chance-ring-inner"><strong>{upgradeChance.toFixed(2)}%</strong><small>ШАНС УСПЕХА</small></div><div className="upgrade-pointer" style={{ transform: `rotate(${upgradeSpinAngle}deg)` }}><i /></div></div>
             <div className="upgrade-arrows">‹ <span>➜</span> ›</div>
             <label>Редкость цели<select value={upgradeTarget} disabled={upgrading} onChange={e => { const rarity=e.target.value as Rarity; setUpgradeTarget(rarity); setUpgradeTargetCard(makeCard(rarity)); setUpgradeOutcome(null); }}>{rarities.map(r => <option key={r}>{r}</option>)}</select></label>
             <button className="primary upgrade-start" disabled={upgrading} onClick={upgrade}>{upgrading ? "АПГРЕЙД..." : "УЛУЧШИТЬ"} <Zap size={15} /></button>
-            <small className="upgrade-cost">БЕСПЛАТНО · РИСК 1 КАРТОЧКА</small>
+            <small className="upgrade-cost">БЕСПЛАТНО · ШАНС = СТОИМОСТЬ / ЦЕЛЬ</small>
             {upgradeOutcome && <b className="upgrade-outcome">{upgradeOutcome === "win" ? "✦ УСПЕШНО!" : "✕ НЕ ПОВЕЗЛО"}</b>}
           </div>
           <div className="upgrade-slot target-slot"><span className="upgrade-slot-label">ЖЕЛАЕМАЯ КАРТОЧКА</span><CardTile card={upgradeTargetCard} /></div>
